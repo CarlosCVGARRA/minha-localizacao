@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Minha Localização</title>
+
+<style>
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    background:#000;
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+    gap:12px;
+}
+
+/* ===== PAINEL ===== */
+.painel{
+    width:450px;
+    max-width:100%;
+    background:#1c1c27;
+    border-radius:20px;
+    padding:20px;
+    color:#fff;
+    box-shadow:0 10px 25px rgba(0,0,0,.6);
+}
+
+.titulo{
+    text-align:center;
+    font-size:28px;
+    margin-bottom:15px;
+}
+
+.card{
+    background:rgba(255,255,255,.05);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.label{
+    color:#aaa;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.valor{
+    font-size:18px;
+    word-break:break-word;
+}
+
+.endereco div{ margin-bottom:4px; }
+
+.botoes{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    flex:1;
+    border:none;
+    padding:12px;
+    border-radius:10px;
+    background:#4a4aa0;
+    color:#fff;
+    cursor:pointer;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+button:hover{ background:#5d5dc7; }
+
+.status{
+    text-align:center;
+    margin-top:10px;
+    color:#bbb;
+    font-size:12px;
+}
+
+#googleMaps{
+    display:block;
+    width:100%;
+    text-align:center;
+    background:#4a4aa0;
+    color:#fff;
+    text-decoration:none;
+    padding:14px;
+    border-radius:10px;
+    font-size:15px;
+}
+
+/* ===== FOOTER ===== */
+.footer{
+    text-align:center;
+    color:#888;
+    font-size:11px;
+    line-height:1.6;
+}
+
+.footer strong{
+    color:#bbb;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="painel">
+
+    <div class="titulo">📍 Minha Localização</div>
+
+    <div class="card">
+        <div class="label">DATA</div>
+        <div class="valor" id="data">--/--/----</div>
+    </div>
+
+    <div class="card">
+        <div class="label">HORA</div>
+        <div class="valor" id="hora">--:--:--</div>
+    </div>
+
+    <div class="card">
+        <div class="label">COORDENADAS GPS</div>
+        <div class="valor" id="coordenadas">Aguardando localização...</div>
+    </div>
+
+    <div class="card">
+        <div class="label">ENDEREÇO</div>
+        <div class="endereco">
+            <div id="rua">Clique em "Autorizar Localização"</div>
+            <div id="bairro"></div>
+            <div id="cidade"></div>
+            <div id="estado"></div>
+            <div id="cep"></div>
+            <div id="pais"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="label">MAPA</div>
+        <a id="googleMaps" href="#" target="_blank">
+            🗺 Abrir Localização no Google Maps
+        </a>
+    </div>
+
+    <div class="botoes">
+
+        <button onclick="autorizarLocalizacao()">📍 Autorizar Localização</button>
+
+        <button onclick="compartilhar()">📤 Compartilhar</button>
+
+        <button onclick="compartilharWhatsApp()">🟢 WhatsApp</button>
+
+        <button onclick="compartilharDiscord()">🟣 Discord</button>
+
+    </div>
+
+    <div class="status" id="status">Aguardando autorização...</div>
+
+</div>
+
+<!-- ===== FOOTER FORA DA INTERFACE ===== -->
+<div class="footer">
+    <strong>Geolocalização</strong><br>
+    Criado por Carlos Cunha Vilela<br>
+    <span id="dataFooter"></span>
+</div>
+
+<script>
+
+/* ===== DATA FOOTER ===== */
+function atualizarFooterData(){
+    const hoje = new Date();
+    document.getElementById("dataFooter").textContent =
+    hoje.toLocaleDateString("pt-BR");
+}
+atualizarFooterData();
+
+/* ===== SISTEMA ORIGINAL ===== */
+
+let latitudeAtual = null;
+let longitudeAtual = null;
+
+function atualizarDataHora(){
+    const agora = new Date();
+    document.getElementById("data").textContent = agora.toLocaleDateString("pt-BR");
+    document.getElementById("hora").textContent = agora.toLocaleTimeString("pt-BR");
+}
+setInterval(atualizarDataHora,1000);
+atualizarDataHora();
+
+async function atualizarEndereco(latitude,longitude){
+    try{
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+        const d = await r.json();
+        const e = d.address || {};
+
+        document.getElementById("rua").textContent =
+        (e.road || "Rua não encontrada") + (e.house_number ? ", "+e.house_number : "");
+
+        document.getElementById("bairro").textContent =
+        e.suburb || e.neighbourhood || "";
+
+        document.getElementById("cidade").textContent =
+        e.city || e.town || e.village || "";
+
+        document.getElementById("estado").textContent = e.state || "";
+        document.getElementById("cep").textContent = e.postcode ? "CEP: "+e.postcode : "";
+        document.getElementById("pais").textContent = e.country || "";
+
+    } catch(e){
+        document.getElementById("status").textContent = "Erro ao obter endereço.";
+    }
+}
+
+function autorizarLocalizacao(){
+
+    const status = document.getElementById("status");
+    status.textContent = "Obtendo localização...";
+
+    navigator.geolocation.watchPosition(async (pos)=>{
+
+        latitudeAtual = pos.coords.latitude;
+        longitudeAtual = pos.coords.longitude;
+
+        document.getElementById("coordenadas").textContent =
+        latitudeAtual.toFixed(6)+", "+longitudeAtual.toFixed(6);
+
+        document.getElementById("googleMaps").href =
+        `https://www.google.com/maps?q=${latitudeAtual},${longitudeAtual}`;
+
+        await atualizarEndereco(latitudeAtual,longitudeAtual);
+
+        status.textContent = "Atualizado.";
+
+    });
+}
+
+function montarTexto(){
+    let t = `📍 MINHA LOCALIZAÇÃO
+
+Data: ${document.getElementById("data").textContent}
+Hora: ${document.getElementById("hora").textContent}
+
+Coordenadas:
+${document.getElementById("coordenadas").textContent}
+
+Endereço:
+${document.getElementById("rua").textContent}
+${document.getElementById("cidade").textContent}
+${document.getElementById("estado").textContent}
+${document.getElementById("pais").textContent}`;
+
+    if(latitudeAtual){
+        t += `\n\nhttps://www.google.com/maps?q=${latitudeAtual},${longitudeAtual}`;
+    }
+    return t;
+}
+
+function compartilhar(){
+    navigator.share ? navigator.share({text:montarTexto()}) :
+    navigator.clipboard.writeText(montarTexto());
+}
+
+function compartilharWhatsApp(){
+    window.open("https://wa.me/?text="+encodeURIComponent(montarTexto()),"_blank");
+}
+
+async function compartilharDiscord(){
+    await navigator.clipboard.writeText(montarTexto());
+    alert("Copiado para o Discord.");
+}
+
+</script>
+
+</body>
+</html>
