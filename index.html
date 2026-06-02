@@ -23,6 +23,20 @@ body{
     gap:12px;
 }
 
+/* ===== AVISO ===== */
+.aviso{
+    width:450px;
+    max-width:100%;
+    background:#12121a;
+    border:1px solid #2b2b3d;
+    color:#bbb;
+    font-size:11px;
+    padding:10px 12px;
+    border-radius:10px;
+    text-align:center;
+    line-height:1.4;
+}
+
 /* ===== PAINEL ===== */
 .painel{
     width:450px;
@@ -120,6 +134,12 @@ button:hover{ background:#5d5dc7; }
 
 <body>
 
+<!-- AVISO PROFISSIONAL -->
+<div class="aviso">
+⚠️ Os dados exibidos são obtidos em tempo real através do navegador e fontes públicas de geolocalização.<br>
+Qualquer tentativa de manipulação ocorre apenas localmente no dispositivo do usuário e não altera as fontes externas.
+</div>
+
 <div class="painel">
 
     <div class="titulo">📍 Minha Localização</div>
@@ -174,7 +194,7 @@ button:hover{ background:#5d5dc7; }
 
 </div>
 
-<!-- ===== FOOTER FORA DA INTERFACE ===== -->
+<!-- FOOTER -->
 <div class="footer">
     <strong>Geolocalização</strong><br>
     Criado por Carlos Cunha Vilela<br>
@@ -183,15 +203,12 @@ button:hover{ background:#5d5dc7; }
 
 <script>
 
-/* ===== DATA FOOTER ===== */
 function atualizarFooterData(){
     const hoje = new Date();
     document.getElementById("dataFooter").textContent =
     hoje.toLocaleDateString("pt-BR");
 }
 atualizarFooterData();
-
-/* ===== SISTEMA ORIGINAL ===== */
 
 let latitudeAtual = null;
 let longitudeAtual = null;
