@@ -10,9 +10,9 @@
 
 *{ box-sizing:border-box; }
 
+/* ===== FUNDO BRASIL ===== */
 body{
     margin:0;
-    background:#000;
     font-family:'Segoe UI',Tahoma,sans-serif;
     display:flex;
     flex-direction:column;
@@ -21,6 +21,22 @@ body{
     min-height:100vh;
     padding:20px;
     gap:12px;
+    overflow-x:hidden;
+
+    background: linear-gradient(120deg,
+        #00b34a,
+        #ffd600,
+        #1e4fff
+    );
+
+    background-size: 400% 400%;
+    animation: brasilFlow 16s ease-in-out infinite;
+}
+
+@keyframes brasilFlow {
+    0%   { background-position:0% 50%; filter:saturate(1.3) brightness(1.02); }
+    50%  { background-position:100% 50%; filter:saturate(1.4) brightness(1.04); }
+    100% { background-position:0% 50%; filter:saturate(1.3) brightness(1.02); }
 }
 
 /* ===== AVISO ===== */
@@ -41,11 +57,12 @@ body{
 .painel{
     width:450px;
     max-width:100%;
-    background:#1c1c27;
+    background:rgba(28,28,39,0.92);
     border-radius:20px;
     padding:20px;
     color:#fff;
     box-shadow:0 10px 25px rgba(0,0,0,.6);
+    backdrop-filter: blur(6px);
 }
 
 .titulo{
@@ -81,27 +98,44 @@ body{
     flex-wrap:wrap;
 }
 
+/* ===== BOTÕES SUAVES ===== */
 button{
     flex:1;
     border:none;
     padding:12px;
     border-radius:10px;
-    background:#4a4aa0;
-    color:#fff;
     cursor:pointer;
     font-size:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
+    color:#fff;
+    font-weight:500;
+
+    background: linear-gradient(120deg,
+        #00a844,
+        #e6c200,
+        #1f4bd6
+    );
+
+    background-size: 250% 250%;
+    animation: botaoFlow 10s ease-in-out infinite;
+
+    transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-button:hover{ background:#5d5dc7; }
+button:hover{
+    transform: scale(1.03);
+    filter: brightness(1.05);
+}
+
+@keyframes botaoFlow {
+    0%   { background-position:0% 50%; }
+    50%  { background-position:100% 50%; }
+    100% { background-position:0% 50%; }
+}
 
 .status{
     text-align:center;
     margin-top:10px;
-    color:#bbb;
+    color:#eee;
     font-size:12px;
 }
 
@@ -120,21 +154,19 @@ button:hover{ background:#5d5dc7; }
 /* ===== FOOTER ===== */
 .footer{
     text-align:center;
-    color:#888;
+    color:#fff;
     font-size:11px;
     line-height:1.6;
+    text-shadow:0 1px 2px rgba(0,0,0,.5);
 }
 
-.footer strong{
-    color:#bbb;
-}
+.footer strong{ color:#fff; }
 
 </style>
 </head>
 
 <body>
 
-<!-- AVISO PROFISSIONAL -->
 <div class="aviso">
 ⚠️ Os dados exibidos são obtidos em tempo real através do navegador e fontes públicas de geolocalização.<br>
 Qualquer tentativa de manipulação ocorre apenas localmente no dispositivo do usuário e não altera as fontes externas.
@@ -179,22 +211,14 @@ Qualquer tentativa de manipulação ocorre apenas localmente no dispositivo do u
     </div>
 
     <div class="botoes">
-
         <button onclick="autorizarLocalizacao()">📍 Autorizar Localização</button>
-
         <button onclick="compartilhar()">📤 Compartilhar</button>
-
-        <button onclick="compartilharWhatsApp()">🟢 WhatsApp</button>
-
-        <button onclick="compartilharDiscord()">🟣 Discord</button>
-
     </div>
 
     <div class="status" id="status">Aguardando autorização...</div>
 
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
     <strong>Geolocalização</strong><br>
     Criado por Carlos Cunha Vilela<br>
@@ -290,17 +314,19 @@ ${document.getElementById("pais").textContent}`;
 }
 
 function compartilhar(){
-    navigator.share ? navigator.share({text:montarTexto()}) :
-    navigator.clipboard.writeText(montarTexto());
-}
+    try {
+        const texto = montarTexto();
 
-function compartilharWhatsApp(){
-    window.open("https://wa.me/?text="+encodeURIComponent(montarTexto()),"_blank");
-}
-
-async function compartilharDiscord(){
-    await navigator.clipboard.writeText(montarTexto());
-    alert("Copiado para o Discord.");
+        if (navigator.share) {
+            navigator.share({ text: texto });
+        } else {
+            navigator.clipboard.writeText(texto);
+            alert("Copiado para compartilhar.");
+        }
+    } catch (err) {
+        alert("Erro ao compartilhar.");
+        console.error(err);
+    }
 }
 
 </script>
